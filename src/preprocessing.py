@@ -62,3 +62,48 @@ def preprocessing_01(df_data, is_train = True, is_debug = True, **kwargs):
         globals().update(**locals())
     
     return df_output
+
+def preprocessing_02(df, is_train=False, is_debug=False, **kwargs):
+    df_output = pd.DataFrame()
+    # Fill missing values
+    # Age: fillna by mean of (Pclass, SibSp, Sex), then fill remaining NaN by overall mean
+    df_output['Age'] = df['Age'].fillna(df.groupby(['Pclass', 'SibSp', 'Sex'])['Age'].transform('mean'))
+    df_output['Age'].fillna(df_output['Age'].mean(), inplace=True)
+    # Fare: fillna by mean of Pclass
+    df_output['Fare'] = df['Fare'].fillna(df.groupby(['Pclass'])['Fare'].transform('mean'))
+    # Embarked: fillna by mode 
+    df_output['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+    # Cabin: fillna by 'Unknown' (indicating no cabin)
+    df_output['Cabin'] = df['Cabin'].fillna('Unknown')
+    # Pclass, SibSp, Parch
+    for name in ['Pclass', 'SibSp', 'Parch', 'Name', 'Sex']:
+        df_output[name] = df[name]
+
+    if is_train:
+        df_output['Survived'] = df['Survived']
+        
+    if is_debug:
+        print('-'*10, 'HEAD', '-'*10)
+        display.display(df.head())
+        print('-'*10, 'TAIL', '-'*10)
+        display.display(df.tail(5))
+        print('-'*10, 'ISNA', '-'*10)
+        display.display(df.isna().sum())
+        # Age: lay median
+        print('-'*10, 'AGE', '-'*10)
+        print(f'Age IsNa: {df["Age"].isna().sum()}')
+        print(f"Age Median: {df.groupby(['Pclass', 'SibSp', 'Sex'])['Age'].median()}")
+        # Fare
+        print('-'*10, 'FARE', '-'*10)
+        display.display(df["Fare"].describe())
+        # Cabin
+        print('-'*10, 'CABIN', '-'*10)
+        display.display(np.unique(df['Cabin'].apply(
+            lambda x: 'Unknown' if pd.isna(x) else x), return_counts=True))
+        # Embarked
+        print('-'*10, 'EMBARKED', '-'*10)
+        display.display(
+            np.unique(df['Embarked'].apply(lambda x: 'NaN' if pd.isna(x) else x), return_counts=True)
+        )
+        globals().update(**locals())
+    return df_output

@@ -1,7 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def plot_countplots(df, columns, target=None, n_cols=3, figsize=(15, 5), colors=["#6099ff"]):
+def plot_countplots(df, columns, target=None, n_cols=3, figsize=(15, 5), colors=["#6099ff", "#ffa060", "#60ff99"]):
     """
     Vẽ nhiều countplot cho các cột trong `columns` với màu cố định.
     
@@ -19,7 +19,7 @@ def plot_countplots(df, columns, target=None, n_cols=3, figsize=(15, 5), colors=
     axes = axes.flatten()
 
     for i, col in enumerate(columns):
-        sns.countplot(data=df, x=col, hue=target, ax=axes[i], palette=colors if colors else None)
+        sns.countplot(data=df, x=col, hue=target, ax=axes[i], palette=colors[:len(df[target].unique())] if target else colors[0])
         axes[i].set_title(f"Countplot of {col}", fontsize=11, fontweight='bold')
         axes[i].set_xlabel(col)
         axes[i].set_ylabel("Count")
